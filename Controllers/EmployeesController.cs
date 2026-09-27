@@ -8,7 +8,7 @@ using SWWebAPI.Models.Entities;
 namespace SWWebAPI.Controllers
 {
     //localhost:xxxx/api/employees
-    [Route("api/[controller]")]
+    [Route("api/employees")]
     [ApiController]
     [Authorize]
     public class EmployeesController : ControllerBase
@@ -19,13 +19,13 @@ namespace SWWebAPI.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet]
+        [HttpGet("GetAllEmployees")]
         public IActionResult GetAllEmployees()
         { 
             return Ok(dbContext.employees.ToList());
 
         }
-        [HttpGet("{id}")]
+        [HttpGet("GetEmployeeById/{id}")]
         public IActionResult GetAllEmployeeById(int id)
         {
             var employee = dbContext.employees.Find(id);
@@ -37,7 +37,7 @@ namespace SWWebAPI.Controllers
            return Ok(employee);
         
         }
-        [HttpPut]
+        [HttpPut("UpdateEmployee")]
         public IActionResult UpdateEmployee(int id, UpdateEmployeeDto updateEmployeeDto)
         {
             var employee = dbContext.employees.Find(id);
@@ -55,7 +55,7 @@ namespace SWWebAPI.Controllers
             dbContext.SaveChanges();
             return Ok(employee);    
         }
-        [HttpDelete]
+        [HttpDelete("DeleteEmployee")]
         public IActionResult DeleteEmployee(int id)
         {
             var employee = dbContext.employees.Find(id);
@@ -69,7 +69,7 @@ namespace SWWebAPI.Controllers
 
         }
         
-       [HttpPost]
+       [HttpPost("AddEmployee")]
         public IActionResult AddEmployee(AddEmployeeDto addEmployeeDto)
         {
            var employeeEntity = new employee()

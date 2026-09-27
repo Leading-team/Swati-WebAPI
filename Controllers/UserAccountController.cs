@@ -7,7 +7,7 @@ using SWWebAPI.Models.Entities;
 
 namespace SWWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/useraccount")]
     [ApiController]
     [Authorize]
     public class UserAccountController : ControllerBase
@@ -17,7 +17,7 @@ namespace SWWebAPI.Controllers
         {
             this.dbContext = dbContext;
         }
-        [HttpGet]
+        [HttpGet("GetAllUserAccounts")]
         public async Task<List<UserAccount>> GetAllUserAccounts()
         {
             return await dbContext.UserAccounts.ToListAsync();

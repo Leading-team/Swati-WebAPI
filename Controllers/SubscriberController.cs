@@ -6,7 +6,7 @@ using SWWebAPI.Models.Entities;
 
 namespace SWWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/subscriber")]
     [ApiController]
     public class SubscriberController : ControllerBase
     {
@@ -15,13 +15,13 @@ namespace SWWebAPI.Controllers
         {
             this.dbContext = dbContext;
         }
-        [HttpGet]
+        [HttpGet("GetAllSubscribers")]
         public IActionResult GetAllSubscribers()
         {
             return Ok(dbContext.subscribers.ToList());
 
         }
-        [HttpPost]
+        [HttpPost("AddSubscriber")]
         public IActionResult AddSubscriber(AddSubscriberDto addSubscriberDto)
         {
             var subscriberEntity = new subscribers()
@@ -42,7 +42,7 @@ namespace SWWebAPI.Controllers
             dbContext.SaveChanges();
             return Ok(subscriberEntity);
         }
-        [HttpPut]
+        [HttpPut("UpdateSubscriber")]
         public IActionResult UpdateSubscriber(int subscriber_id, UpdateSubscriberDto updateSubscriberDto)
         {
             var subscriber = dbContext.subscribers.Find(subscriber_id);

@@ -6,7 +6,7 @@ using SWWebAPI.Services;
 
 namespace SWWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/account")]
     [ApiController]
     public class AccountController : ControllerBase
     {

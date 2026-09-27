@@ -6,7 +6,7 @@ using SWWebAPI.Models.Entities;
 
 namespace SWWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/subscriptionplan")]
     [ApiController]
     public class SubscriptionPlanController : ControllerBase
     {
@@ -15,13 +15,13 @@ namespace SWWebAPI.Controllers
         {
             this.dbContext = dbContext;
         }
-        [HttpGet]
+        [HttpGet("GetAllSubscriptionPlans")]
         public IActionResult GetAllSubscriptionPlans()
         {
             return Ok(dbContext.subscription_plan.ToList());
 
         }
-        [HttpPost]
+        [HttpPost("AddSubscriptionPlan")]
         public IActionResult AddSubscriptionPlan(AddSubscriptionPlanDto addSubscriptionPlanDto)
         {
             var subscriptionEntity = new subscription_plan()
