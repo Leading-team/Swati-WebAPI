@@ -1,0 +1,6 @@
+@SWWebAPI_HostAddress = http://localhost:5206
+
+GET {{SWWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
