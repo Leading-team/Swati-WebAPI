@@ -13,6 +13,8 @@ namespace SWWebAPI.Models.Entities
         [Column(TypeName = "char(2)")]
         [MaxLength(2)]
         public string language { get; set; } = "te";
+
+        public string route_name { get; set; }
         public DateTime created_date { get; set; } = DateTime.UtcNow;
         public bool active { get; set; } = true;
     }

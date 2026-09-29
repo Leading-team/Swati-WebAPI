@@ -29,6 +29,7 @@ namespace SWWebAPI.Controllers
             var menuEntity = new menu_list()
             {
                 menu_name = addMenuDto.menu_name,
+                route_name = addMenuDto.route_name,
                 language = addMenuDto.language,
             };
             dbContext.menu_list.Add(menuEntity);

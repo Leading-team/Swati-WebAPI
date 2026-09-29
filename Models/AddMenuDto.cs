@@ -7,6 +7,7 @@ namespace SWWebAPI.Models
         [Required]
         [MaxLength(500)]
         public string menu_name { get; set; } = string.Empty;
+        public string route_name { get; set; } = string.Empty;
         public string language { get; set; } = "te";
 
     }
