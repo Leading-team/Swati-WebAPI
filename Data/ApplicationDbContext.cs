@@ -15,6 +15,10 @@ namespace SWWebAPI.Data
         public DbSet<menu_list> menu_list { get; set; }
         public DbSet<subscribers> subscribers { get; set; }
         public DbSet<subscription_plan> subscription_plan { get; set; }
+
+        public DbSet<swati_images> swati_images { get; set; }
+
+        public DbSet<MenuSubSectionsDto> MenuSubSections { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -27,6 +31,9 @@ namespace SWWebAPI.Data
                     Password = PasswordHashHandler.HashPassword("admin123"),
                 }
                 ]);
+            modelBuilder.Entity<MenuSubSectionsDto>()
+                .HasNoKey()
+                .ToView(null);
         }
     }
 }
