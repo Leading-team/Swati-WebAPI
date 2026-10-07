@@ -16,7 +16,7 @@ namespace SWWebAPI.Controllers
 {
     [Route("api/menulist")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class MenuListController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
