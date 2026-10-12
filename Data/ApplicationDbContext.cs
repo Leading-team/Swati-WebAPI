@@ -10,12 +10,14 @@ namespace SWWebAPI.Data
         {
 
         }
+        public DbSet<Language> language { get; set; }
+        public DbSet<Country> country { get; set; }
         public DbSet<employee> employees { get; set; }
         public DbSet<UserAccount> UserAccounts { get; set; }
         public DbSet<menu_list> menu_list { get; set; }
         public DbSet<subscribers> subscribers { get; set; }
         public DbSet<subscription_plan> subscription_plan { get; set; }
-
+        
         public DbSet<swati_images> swati_images { get; set; }
 
         public DbSet<MenuSubSectionsDto> MenuSubSections { get; set; }
