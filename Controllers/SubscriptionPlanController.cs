@@ -76,8 +76,8 @@ namespace SWWebAPI.Controllers
                 created_by = addSubscriptionPlanDto.created_by,
 
             };
-            dbContext.subscription_plan.Add(subscriptionEntity);
-            dbContext.SaveChanges();
+            //dbContext.subscription_plan.Add(subscriptionEntity);
+            //dbContext.SaveChanges();
             return Ok(subscriptionEntity);
         }
 
