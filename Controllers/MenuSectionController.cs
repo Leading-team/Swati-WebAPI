@@ -82,8 +82,9 @@ namespace SWWebAPI.Controllers
                       Tiles = section
                           .Select(x => new SwatiTileDto
                           {
-                              Title = x.Text,
-                              Text = x.Content,
+                              Title = x.Title,
+                              Text = x.Text,
+                              Content = x.Content,
                               Image = ToUrl(x.Image)
                           })
                           .ToList()
