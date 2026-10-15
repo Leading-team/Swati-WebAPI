@@ -14,7 +14,7 @@ using SWWebAPI.Models.Entities;
 
 
 namespace SWWebAPI.Controllers
-{   
+{
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
@@ -84,7 +84,7 @@ namespace SWWebAPI.Controllers
                           {
                               Title = x.Title,
                               Text = x.Text,
-                              Content = x.Content,
+                              //Content = x.Content,
                               Image = ToUrl(x.Image)
                           })
                           .ToList()

@@ -56,6 +56,16 @@ namespace SWWebAPI.Controllers
                 {
                     json.Append(reader.GetString(0));   // FOR JSON comes back in chunks of ~2 KB
                 }
+
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
+            {
+                // Log database connection or SQL errors
+                return StatusCode(503, new
+                {
+                    success = false,
+                    message = "Unable to connect to the database. Please try again later."
+                });
             }
             finally
             {
@@ -67,7 +77,7 @@ namespace SWWebAPI.Controllers
             return Content(result, "application/json");
         }
 
-            [HttpPost("AddSubscriptionPlan")]
+        [HttpPost("AddSubscriptionPlan")]
         public IActionResult AddSubscriptionPlan(AddSubscriptionPlanDto addSubscriptionPlanDto)
         {
             var subscriptionEntity = new subscription_plan()
