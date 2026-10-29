@@ -12,6 +12,8 @@ namespace SWWebAPI.Data
         }
         public DbSet<Language> language { get; set; }
         public DbSet<Country> country { get; set; }
+
+        public DbSet<ContactEmailDetails> contact_email_details { get; set; }
         public DbSet<employee> employees { get; set; }
         public DbSet<UserAccount> UserAccounts { get; set; }
         public DbSet<menu_list> menu_list { get; set; }
@@ -21,6 +23,8 @@ namespace SWWebAPI.Data
         public DbSet<swati_images> swati_images { get; set; }
 
         public DbSet<MenuSubSectionsDto> MenuSubSections { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

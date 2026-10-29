@@ -75,5 +75,35 @@ namespace SWWebAPI.Controllers
                 });
             }
         }
+        [HttpGet("GetContactEmailDetails")]
+        public IActionResult GetContactEmailDetails()
+        {
+            try
+            {
+                var contactEmails = dbContext.contact_email_details
+                                         .Where(r => r.active == true)
+                                         .ToList();
+
+                return Ok(contactEmails);
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
+            {
+                // Log database connection or SQL errors
+                return StatusCode(503, new
+                {
+                    success = false,
+                    message = "Unable to connect to the database. Please try again later."
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log unexpected errors
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An unexpected error occurred while retrieving languages."
+                });
+            }
+        }
     }
 }

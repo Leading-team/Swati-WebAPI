@@ -7,6 +7,7 @@
         public string? SectionTitle { get; set; }
 
         public string? SectionName { get; set; }
+        public string? SectionDesc { get; set; }
 
         public string? CoverImage { get; set; }
 

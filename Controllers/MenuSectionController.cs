@@ -30,37 +30,96 @@ namespace SWWebAPI.Controllers
         [HttpGet("GetMenuSectionsById")]
         public async Task<IActionResult> GetMenuSectionsById(int menuId)
         {
-            //var data = await dbContext.MenuSubSections
-            //    .FromSqlRaw("EXEC dbo.GetMagazineMenuSections @MenuId = {menuId}")
-            //    .AsNoTracking()
-            //    .ToListAsync();
+            var result = new List<SwatiMenuDto>();
 
-            string Azurestrgconnection_string = _configuration.GetConnectionString("AzureBlobStorage");
-            string blobcotainerName = "swati-sections-test";
-            var containerClient = new BlobContainerClient(Azurestrgconnection_string, blobcotainerName);
-
-            string? ToUrl(string? blobName)
+            try
             {
-                if (string.IsNullOrWhiteSpace(blobName)) return "";
+                // Validate configuration
+                string? storageConnectionString =
+           _configuration.GetConnectionString("AzureBlobStorage");
 
-                var blob = containerClient.GetBlobClient(blobName.Trim());
-                var sas = new BlobSasBuilder
+                if (string.IsNullOrWhiteSpace(storageConnectionString))
                 {
-                    BlobContainerName = containerClient.Name,
-                    BlobName = blob.Name,
-                    Resource = "b",
-                    ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(30)
-                };
-                sas.SetPermissions(BlobSasPermissions.Read);
-                return blob.GenerateSasUri(sas).ToString();
-            }
+                    //_logger.LogError(
+                    //    "AzureBlobStorage connection string is missing.");
 
-            var data = await dbContext.MenuSubSections
-    .FromSqlRaw("EXEC dbo.GetMagazineMenuSections @MenuId",
-                new SqlParameter("@MenuId", menuId))
-    .AsNoTracking()
-    .ToListAsync();
-            var result = data
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Storage configuration is unavailable."
+                    });
+                }
+                string containerName = "swati-sections-test";
+                var containerClient =
+                    new BlobContainerClient(storageConnectionString, containerName);
+
+                string? ToUrl(string? blobName)
+                {
+                    if (string.IsNullOrWhiteSpace(blobName))
+                        return string.Empty;
+
+                    var blob = containerClient.GetBlobClient(blobName.Trim());
+
+                    var sas = new BlobSasBuilder
+                    {
+                        BlobContainerName = containerClient.Name,
+                        BlobName = blob.Name,
+                        Resource = "b",
+                        ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(30)
+                    };
+
+                    sas.SetPermissions(BlobSasPermissions.Read);
+
+                    return blob.GenerateSasUri(sas).ToString();
+                }
+
+                //        var data = await dbContext.MenuSubSections
+                //.FromSqlRaw("EXEC dbo.GetMagazineMenuSections @MenuId",
+                //            new SqlParameter("@MenuId", menuId))
+                //.AsNoTracking()
+                //.ToListAsync();
+                const string sql = @"
+    SELECT
+        M.menu_name AS MenuName,
+        S.te_section_name AS SectionTitle,
+        S.en_section_name AS SectionName,
+        '' AS SectionDesc,
+        '' AS CoverImage,
+        ISNULL(SC.sub_caption, '') AS Title,
+        ISNULL(SC.content, '') AS Text,
+        ISNULL(SC.filename, '') AS Image
+    FROM menu_list M
+    INNER JOIN Sections S
+        ON M.menu_id = S.Menu_Id
+    INNER JOIN section_configuration SC
+        ON S.Section_Id = SC.section_id
+    WHERE M.menu_id = @MenuId
+    ORDER BY
+        M.menu_id,
+        S.Section_Id,
+        SC.priority;";
+                List<MenuSubSectionsDto> data;
+                try
+                {
+                    data = await dbContext.MenuSubSections
+              .FromSqlRaw(sql, new SqlParameter("@MenuId", menuId))
+              .AsNoTracking()
+              .ToListAsync();
+                }
+                catch (Microsoft.Data.SqlClient.SqlException ex)
+                {
+                    //_logger.LogError(
+                    //    ex,
+                    //    "Database error retrieving menu sections. MenuId: {MenuId}",
+                    //    menuId);
+
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Unable to retrieve menu sections from the database."
+                    });
+                }
+                result = data
           .GroupBy(x => x.MenuName)
           .Select(menu => new SwatiMenuDto
           {
@@ -92,8 +151,34 @@ namespace SWWebAPI.Controllers
                   .ToList()
           })
           .ToList();
+                return Ok(result);
+            }
+            catch (Azure.RequestFailedException ex)
+            {
+                //_logger.LogError(
+                //    ex,
+                //    "Azure Blob Storage error retrieving menu images. MenuId: {MenuId}",
+                //    menuId);
 
-            return Ok(result);
+                return StatusCode(502, new
+                {
+                    success = false,
+                    message = "Unable to retrieve menu images from storage."
+                });
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError(
+                //    ex,
+                //    "Unexpected error retrieving menu sections. MenuId: {MenuId}",
+                //    menuId);
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An unexpected error occurred while retrieving menu sections."
+                });
+            }
         }
     }
 }
