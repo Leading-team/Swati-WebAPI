@@ -7,14 +7,18 @@
         public string? SectionTitle { get; set; }
 
         public string? SectionName { get; set; }
+        public string? NavLink { get; set; }
         public string? SectionDesc { get; set; }
 
         public string? CoverImage { get; set; }
 
         public string? Title { get; set; }
 
+        public string? TitleEn { get; set; }
+
         public string? Text { get; set; }
-        //public string? Content { get; set; }
+        
+        public string? TextEn { get; set; }
 
         public string? Image { get; set; }
     }
@@ -30,6 +34,7 @@
         public string? SectionTitle { get; set; }
 
         public string? SectionName { get; set; }
+        public string? NavLink { get; set; }
 
         public string? CoverImage { get; set; }
 
@@ -39,10 +44,10 @@
     public class SwatiTileDto
     {
         public string? Title { get; set; }
+        public string? TitleEn { get; set; }
 
         public string? Text { get; set; }
-        //public string? Content { get; set; }
-
+        public string? TextEn { get; set; }
         public string? Image { get; set; }
     }
 }

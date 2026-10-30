@@ -83,10 +83,13 @@ namespace SWWebAPI.Controllers
         M.menu_name AS MenuName,
         S.te_section_name AS SectionTitle,
         S.en_section_name AS SectionName,
+        ISNULL(S.navlink, '') AS NavLink,
         '' AS SectionDesc,
         '' AS CoverImage,
         ISNULL(SC.sub_caption, '') AS Title,
+        ISNULL(SC.sub_caption_en, '') AS TitleEn,
         ISNULL(SC.content, '') AS Text,
+        ISNULL(SC.content_en, '') AS TextEn,
         ISNULL(SC.filename, '') AS Image
     FROM menu_list M
     INNER JOIN Sections S
@@ -130,6 +133,7 @@ namespace SWWebAPI.Controllers
                   {
                       x.SectionTitle,
                       x.SectionName,
+                      x.NavLink,
                       x.CoverImage
                   })
                   .Select(section => new SwatiSectionDto
@@ -143,7 +147,8 @@ namespace SWWebAPI.Controllers
                           {
                               Title = x.Title,
                               Text = x.Text,
-                              //Content = x.Content,
+                              TitleEn = x.TitleEn,
+                              TextEn = x.TextEn,
                               Image = ToUrl(x.Image)
                           })
                           .ToList()
