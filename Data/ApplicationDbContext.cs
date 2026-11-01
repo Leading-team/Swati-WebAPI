@@ -23,7 +23,8 @@ namespace SWWebAPI.Data
         public DbSet<swati_images> swati_images { get; set; }
 
         public DbSet<MenuSubSectionsDto> MenuSubSections { get; set; }
-
+        public DbSet<PlanPrice> planprice { get; set; }
+        public DbSet<SubscriptionPayment> subscription_payment { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

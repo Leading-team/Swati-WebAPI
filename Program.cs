@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SWWebAPI.Data;
 using SWWebAPI.Models;
+using SWWebAPI.Models.Entities;
 using SWWebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,6 +70,14 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<SWWebAPI.Services.JwtService>();
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ContactUsService>();
+
+
 builder.Services.Configure<RazorpayOptions>(
     builder.Configuration.GetSection("Razorpay"));
 
@@ -78,11 +87,11 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
