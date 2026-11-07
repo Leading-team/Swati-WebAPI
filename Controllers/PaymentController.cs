@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MailKit.Search;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -23,15 +25,17 @@ namespace SWWebAPI.Controllers
         private readonly RazorpayOptions _options;
         private readonly HttpClient _httpClient;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IEmailService _emailService;
 
         public PaymentController(
             RazorpayClient razorpay,
-            IOptions<RazorpayOptions> options, HttpClient httpClient, ApplicationDbContext dbContext)
+            IOptions<RazorpayOptions> options, HttpClient httpClient, ApplicationDbContext dbContext, IEmailService emailService)
         {
             _razorpay = razorpay;
             _options = options.Value;
             _httpClient = httpClient;
             _dbContext = dbContext;
+            _emailService = emailService;
         }
         // GET: /api/payment/config
         [HttpGet("config")]
@@ -408,6 +412,23 @@ namespace SWWebAPI.Controllers
                     true
                 );
 
+                var emailDetails = await GetSubscriptionEmailDetailsAsync(
+        paymentRecord.subscription_payment_id);
+
+                if (emailDetails != null)
+                {
+                    try
+                    {
+                        await _emailService.SendSubscriptionPaymentEmailAsync(
+                            emailDetails);
+                    }
+                    catch (Exception ex)
+                    {
+                        //_logger.LogError(ex,
+                        //    "Subscription confirmation email failed for OrderId: {OrderId}",
+                        //    request.OrderId);
+                    }
+                }
                 // 8. Return result
                 if (paymentStatus != "captured")
                 {
@@ -458,6 +479,70 @@ namespace SWWebAPI.Controllers
                 throw new Exception("Payment record not found.");
 
             return paymentRecord;
+        }
+        private async Task<SubscriptionPaymentEmailRequest> GetSubscriptionEmailDetailsAsync(int? subscriptionPaymentId, CancellationToken cancellationToken = default)
+        {
+
+            var sql = @"
+   select sb.subscriber_name SubscriberName,sb.email Email,plan_name PlanName,M.title Edition,durationmonths SubscriptionTerm,
+PP.price SubscriptionAmount,PP.courier_price as CourierCharges,0 ProcessingFee,0 GstAmount,  
+SP.Amount TotalAmount,RazorpayPaymentId PaymentId,RazorpayOrderId OrderId,issue_date StartDate,expirydate EndDate
+from subscription_payment SP
+INNER JOIN subscription S ON SP.subscription_id = S.subscription_id
+INNER JOIN subscription_plan SBP ON S.plan_id = SBP.plan_Id
+INNER JOIN subscriber sb ON s.subscriber_id = sb.subscriber_id
+INNER JOIN subscriber_address SBR ON S.address_id = SBR.address_id
+INNER JOIN PlanPrice PP ON S.plan_id = PP.plan_id and PP.country_id =SBR.country_id
+INNER JOIN magazine M ON SBP.magazine_id = M.magazine_id
+WHERE SP.subscription_payment_id =" + subscriptionPaymentId;
+
+
+            SubscriptionPaymentEmailRequest? emailDetails = null;
+
+            await using (var connection = new SqlConnection(_dbContext.Database.GetDbConnection().ConnectionString))
+            {
+                await connection.OpenAsync(cancellationToken);
+
+                await using (var command = new SqlCommand(sql, connection))
+                {
+                    //command.Parameters.Add("@OrderId", SqlDbType.VarChar, 100)
+                    //    .Value = request.OrderId;
+
+                    await using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                    {
+                        if (await reader.ReadAsync(cancellationToken))
+                        {
+                            emailDetails = new SubscriptionPaymentEmailRequest
+                            {
+                                SubscriberName = reader["SubscriberName"]?.ToString() ?? "",
+                                Email = reader["Email"]?.ToString() ?? "",
+                                PlanName = reader["PlanName"]?.ToString() ?? "",
+                                Edition = reader["Edition"]?.ToString() ?? "",
+                                SubscriptionTerm = reader["SubscriptionTerm"]?.ToString() ?? "",
+
+                                SubscriptionAmount = Convert.ToDecimal(reader["SubscriptionAmount"]),
+                                CourierCharges = Convert.ToDecimal(reader["CourierCharges"]),
+                                ProcessingFee = Convert.ToDecimal(reader["ProcessingFee"]),
+                                GstAmount = Convert.ToDecimal(reader["GstAmount"]),
+                                TotalAmount = Convert.ToDecimal(reader["TotalAmount"]),
+
+                                PaymentId = reader["PaymentId"]?.ToString() ?? "",
+                                OrderId = reader["OrderId"]?.ToString() ?? "",
+
+                                StartDate = reader["StartDate"] == DBNull.Value
+                                    ? null
+                                    : Convert.ToDateTime(reader["StartDate"]),
+
+                                EndDate = reader["EndDate"] == DBNull.Value
+                                    ? null
+                                    : Convert.ToDateTime(reader["EndDate"])
+                            };
+                           
+                        }
+                    }
+                }
+            }
+            return emailDetails;
         }
 
         public class CreateMagazineSubscriptionResult

@@ -10,6 +10,9 @@ public interface IEmailService
     Task SendContactEmailAsync(
         ContactUsRequest request,
         CancellationToken cancellationToken = default);
+    Task SendSubscriptionPaymentEmailAsync(
+    SubscriptionPaymentEmailRequest request,
+    CancellationToken cancellationToken = default);
 }
 
 public class EmailService : IEmailService
@@ -68,4 +71,116 @@ public class EmailService : IEmailService
 
         await client.DisconnectAsync(true, cancellationToken);
     }
+    public async Task SendSubscriptionPaymentEmailAsync(
+    SubscriptionPaymentEmailRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        var message = new MimeMessage();
+
+        message.From.Add(new MailboxAddress(
+            _settings.FromName,
+            _settings.FromEmail));
+
+        message.To.Add(MailboxAddress.Parse(request.Email));
+
+        message.Subject = "Subscription Payment Successful - Swati Magazine";
+
+        message.Body = new BodyBuilder
+        {
+            HtmlBody = $@"
+        <div style='font-family:Arial,sans-serif;
+                    max-width:650px;margin:auto;
+                    border:1px solid #ddd;padding:25px;'>
+
+            <h2 style='color:#2e7d32;'>
+                Payment Successful!
+            </h2>
+
+            <p>Dear {System.Net.WebUtility.HtmlEncode(request.SubscriberName)},</p>
+
+            <p>
+                Thank you for subscribing to Swati Magazine.
+                Your payment has been successfully received.
+            </p>
+
+            <h3>Subscription Details</h3>
+
+            <table style='width:100%;border-collapse:collapse;'>
+                <tr>
+                    <td style='padding:8px;'>Plan</td>
+                    <td style='padding:8px;'>{System.Net.WebUtility.HtmlEncode(request.PlanName)}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Edition</td>
+                    <td style='padding:8px;'>{System.Net.WebUtility.HtmlEncode(request.Edition)}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Subscription Term</td>
+                    <td style='padding:8px;'>{System.Net.WebUtility.HtmlEncode(request.SubscriptionTerm)}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Subscription Amount</td>
+                    <td style='padding:8px;'>₹{request.SubscriptionAmount:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Courier Charges</td>
+                    <td style='padding:8px;'>₹{request.CourierCharges:N2}</td>
+                </tr>
+               
+                <tr style='font-weight:bold;'>
+                    <td style='padding:8px;'>Total Amount Paid</td>
+                    <td style='padding:8px;'>₹{request.TotalAmount:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Payment ID</td>
+                    <td style='padding:8px;'>{System.Net.WebUtility.HtmlEncode(request.PaymentId)}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Order ID</td>
+                    <td style='padding:8px;'>{System.Net.WebUtility.HtmlEncode(request.OrderId)}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Subscription Start Date</td>
+                    <td style='padding:8px;'>{request.StartDate?.ToString("dd-MMM-yyyy") ?? "-"}</td>
+                </tr>
+                <tr>
+                    <td style='padding:8px;'>Subscription End Date</td>
+                    <td style='padding:8px;'>{request.EndDate?.ToString("dd-MMM-yyyy") ?? "-"}</td>
+                </tr>
+            </table>
+
+            <p>
+                Thank you for choosing Swati Magazine.
+            </p>
+
+            <p>
+                Regards,<br/>
+                Swati Magazine Team
+            </p>
+        </div>"
+        }.ToMessageBody();
+
+        using var client = new MailKit.Net.Smtp.SmtpClient();
+
+        await client.ConnectAsync(
+            _settings.Host,
+            _settings.Port,
+            SecureSocketOptions.StartTls,
+            cancellationToken);
+
+        try
+        {
+            await client.AuthenticateAsync(
+                _settings.Username,
+                _settings.Password,
+                cancellationToken);
+
+            await client.SendAsync(message, cancellationToken);
+        }
+        finally
+        {
+            await client.DisconnectAsync(true, cancellationToken);
+        }
+    }
+
 }

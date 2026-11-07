@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using SWWebAPI.Data;
 using SWWebAPI.Models;
 using SWWebAPI.Models.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Text;
 using System.Text.Json;
@@ -27,10 +28,14 @@ namespace SWWebAPI.Controllers
         }
         
         [HttpGet("GetAllSubscriptionPlans")]
-        public async Task<IActionResult> GetAllSubscriptionPlans()
+        public async Task<IActionResult> GetAllSubscriptionPlans([FromQuery] int? CountryId,[FromQuery] int? LanguageId)
         {
-            int CountryId = 1;
-            int LanguageId = 23;
+            CountryId = CountryId ?? 1;
+            LanguageId = LanguageId ?? 21; // Set your required default
+
+            //if (!CountryId.HasValue || !LanguageId.HasValue)
+            //    return BadRequest("CountryId and LanguageId are required.");
+
             try
             {
                 string? storageConnectionString =
