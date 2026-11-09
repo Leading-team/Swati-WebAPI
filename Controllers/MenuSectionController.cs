@@ -49,7 +49,12 @@ namespace SWWebAPI.Controllers
                         message = "Storage configuration is unavailable."
                     });
                 }
+                
                 string containerName = "swati-sections-test";
+                if(menuId != 1)
+                {
+                    containerName = "swati-pagewise";
+                }
                 var containerClient =
                     new BlobContainerClient(storageConnectionString, containerName);
 
